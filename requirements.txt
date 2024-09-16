@@ -1,0 +1,8 @@
+tensorflow==2.13.0
+scanpy==1.10.0
+anndata==0.10.6
+python-louvain==0.16
+networkx==3.0
+scipy==1.7.3
+
+
