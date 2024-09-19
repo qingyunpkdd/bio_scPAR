@@ -3,6 +3,14 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
+from utils.data_process.read_reactome import Gmt
+from utils.pipe_analysis.deg import DiffereceGene
+from utils.data_process.load_data import LoadMatrixDataReal
+from utils.data_process.load_data import TransformDataReal
+
+
+from utils.pipe_analysis.cell_type_pipe import CellTypePipe
+
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.

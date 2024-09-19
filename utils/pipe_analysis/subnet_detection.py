@@ -57,6 +57,43 @@ class Graph:
         communities = community_louvain.best_partition(self.G)
         return communities
 
+    # build subgraph from communities
+    def build_subgraph(self, communities):
+        subgraphs = {}
+        for node, community_id in communities.items():
+            if community_id not in subgraphs:
+                subgraphs[community_id] = nx.Graph()
+            subgraphs[community_id].add_node(node)
+        for edge in self.G.edges():
+            node1, node2 = edge
+            community_id1 = communities[node1]
+            community_id2 = communities[node2]
+            if community_id1 == community_id2:
+                subgraphs[community_id1].add_edge(node1, node2)
+        return subgraphs
+
+    # save graph to edge list type
+    def save_graph(self, G, out_fp):
+        nx.write_edgelist(G, out_fp)
+        print(f"save graph to {out_fp}")
+
+    def summary(self, G=None, out_fp=None):
+        # 输出图的节点数和边数, 平均度等信息
+        if G is None:
+            G = self.G
+        info = {}
+        info["node_num"] = len(G.nodes)
+        info["edge_num"] = len(G.edges)
+        info["average_degree"] = np.mean(list(dict(G.degree()).values()))
+        print(info)
+        if out_fp is not None:
+            with open(out_fp, "w") as f:
+                f.write(f"node_num: {info['node_num']}\n")
+                f.write(f"edge_num: {info['edge_num']}\n")
+                f.write(f"average_degree: {info['average_degree']}\n")
+        return info
+
+
 
 
 

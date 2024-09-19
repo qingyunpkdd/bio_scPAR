@@ -48,7 +48,7 @@ class Gmt:
 
 
 # 创建一个gmt对象，同时创建一个InteractionData对象，遍历gmt中的每一条通路，遍历InteractionData对象的interactions属性，如果通路中的基因在interactions中的Gene1和Gene2同时出现，将其添加到一个新的dataframe中，结构和interactions相同，所有的dataframe拼接在一起，形成一个新的dataframe，并添加一列“pathway”，将其值设置为通路名。
-class RegulationNetwork:
+class ReactomeNetwork:
 
     def __init__(self, gmt_fp, interaction_fp):
         self.gmt_fp = gmt_fp
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     gmt_fp = os.path.join(base_dir, "ReactomePathways.gmt")
     interaction_fp = os.path.join(base_dir, "FIsInGene_070323_with_annotations.txt")
 
-    regnetwork = RegulationNetwork(gmt_fp, interaction_fp)
+    regnetwork = ReactomeNetwork(gmt_fp, interaction_fp)
     data = regnetwork.get_data()
     #print(data)
     data_by_pathway = regnetwork.split_data()

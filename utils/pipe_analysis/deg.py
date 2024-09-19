@@ -2,7 +2,7 @@ import scanpy as sc
 from utils.data_process.read_cell_type import read_cell_type
 import pandas as pd
 import os
-
+from config import Config
 
 class DiffereceGene:
     def __init__(self,
@@ -11,9 +11,10 @@ class DiffereceGene:
         self.data_path = data_path
         self.cell_type_fn = cell_type_fn
         self.deg_dict = {}
+        self.deg_df_dict = {}
 
     def load_data(self):
-        adata = sc.read_10x_mtx(self.data_path, var_names='gene_symbols', cache=True)
+        adata = sc.read_10x_mtx(self.data_path, var_names='gene_symbols', cache=False)
         return adata
 
     def assign_cell_type(self, adata):
@@ -22,7 +23,10 @@ class DiffereceGene:
         adata.obs['cell_type'] = cell_types
         return adata
 
-    def get_diff_genes(self, adata, pvals=0.05, pvals_adj=0.05, log2fc=0.25):
+    def get_diff_genes(self, adata):
+        pvals = Config.deg_threshold_dict["p_value"]
+        pvals_adj = Config.deg_threshold_dict["pval_adj"]
+        log2fc = Config.deg_threshold_dict["log2fc"]
         sc.tl.rank_genes_groups(adata, "cell_type", method="t-test")
         # get all marker genes for all clusters
         result = adata.uns["rank_genes_groups"]
@@ -39,6 +43,10 @@ class DiffereceGene:
             deg = deg[deg[cell + "__pvals"] < pvals]
             deg = deg[deg[cell + "__logfoldchanges"] > log2fc]
             self.deg_dict[cell] = deg[cell + "__names"].tolist()
+            # filter all other cell type columns, and rename the columns: trim the "cell__" prefix
+            deg = deg.filter(like=cell + "__")
+            # deg.columns = [col.replace(cell + "__", "") for col in deg.columns]
+            self.deg_df_dict[cell] = deg
 
     def preprocess(self, adata):
         sc.pp.normalize_total(adata, target_sum=1e4)
@@ -48,6 +56,16 @@ class DiffereceGene:
         # get the differentially expressed genes
         sc.tl.filter_rank_genes_groups(adata, groupby="cell_type", key_added="rank_genes_groups_filtered")
         return adata
+
+    def save_deg_df_dict(self, column_names=None):
+        deg_dir = Config.deg_fp
+        for cell_type, deg_df in self.deg_df_dict.items():
+            deg_fn = os.path.join(deg_dir, f"{cell_type}_deg.tsv")
+            if column_names is not None:
+                deg_df = deg_df[column_names]
+            deg_df.to_csv(deg_fn, sep='\t', index=False)
+
+        print("保存成功")
 
 
 '''
@@ -71,19 +89,21 @@ if __name__ == "__main__":
     adata = diff_gene.preprocess(adata)
     diff_gene.get_diff_genes(adata)
 
-    # 创建空 DataFrame
-    results_df = pd.DataFrame(columns=['cell_type', 'genes'])
+    diff_gene.save_deg_df_dict()
 
-    # 打印每种细胞类型的差异表达基因
-    for cell_type, genes in diff_gene.deg_dict.items():
-        print(f"Differentially expressed genes for {cell_type}: {genes}")
-
-    # 将结果添加到 DataFrame
-    rows = []
-    for cell_type, genes in diff_gene.deg_dict.items():
-        rows.append({'cell_type': cell_type, 'genes': ','.join(genes)})
-
-    results_df = pd.concat([results_df, pd.DataFrame(rows)], ignore_index=True)
-
-    results_df.to_csv('diff_genes_results_pbmc.csv', index=False)
+    # # 创建空 DataFrame
+    # results_df = pd.DataFrame(columns=['cell_type', 'genes'])
+    #
+    # # 打印每种细胞类型的差异表达基因
+    # for cell_type, genes in diff_gene.deg_dict.items():
+    #     print(f"Differentially expressed genes for {cell_type}: {genes}")
+    #
+    # # 将结果添加到 DataFrame
+    # rows = []
+    # for cell_type, genes in diff_gene.deg_dict.items():
+    #     rows.append({'cell_type': cell_type, 'genes': ','.join(genes)})
+    #
+    # results_df = pd.concat([results_df, pd.DataFrame(rows)], ignore_index=True)
+    #
+    # results_df.to_csv('diff_genes_results_pbmc.csv', index=False)
     print("保存成功")

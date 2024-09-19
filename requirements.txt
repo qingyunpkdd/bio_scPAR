@@ -4,5 +4,8 @@ anndata==0.10.6
 python-louvain==0.16
 networkx==3.0
 scipy==1.7.3
-
+pandas==1.5.3
+numpy==1.22.4
+community==0.16
+gseapy==0.10.8
 

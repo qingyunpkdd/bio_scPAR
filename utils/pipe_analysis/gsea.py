@@ -64,7 +64,8 @@ class GSEA:
         return gmt
 
     def enrich(self, gene_list, save_fp=None):
-        gene_list = self.build_gene_list(gene_list)
+        if isinstance(gene_list, str):
+            gene_list = self.build_gene_list(gene_list)
         background = self.background
         gmt = self.gmt
         outdir = self.outdir if save_fp is None else save_fp
@@ -87,6 +88,12 @@ class GSEA:
         elif metric == "Term":
             results = results[results[metric] in threshold]
         return results
+
+    def save_results(self, results, save_fp):
+        if isinstance(results, pd.DataFrame) and save_fp is not None:
+            results.to_csv(save_fp, sep='\t', index=False)
+        else:
+            raise ValueError("results should be a pandas DataFrame")
 
     #返回满足要求的通路的名字
     def get_terms(self, results):

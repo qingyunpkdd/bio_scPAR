@@ -53,8 +53,8 @@ class PPI:
 '''
 
 if __name__ == '__main__':
-    mapping_fp = r"/home/liuyq/data/ar_data/ppi/G-SynMiner_miner-geneHUGO.tsv"
-    ppi_fp = r"/home/liuyq/data/ar_data/ppi/PP-Decagon_ppi.csv"
+    mapping_fp = r"/home/liuyq/data/ar_data/interaction_db/ppi/G-SynMiner_miner-geneHUGO.tsv"
+    ppi_fp = r"/home/liuyq/data/ar_data/interaction_db/ppi/PP-Decagon_ppi.csv"
     ppi_obj = PPI(mapping_fp, ppi_fp)
     ppi_obj.read_mapper()
     ppi_obj.read_ppi()

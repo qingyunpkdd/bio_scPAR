@@ -80,7 +80,7 @@ class FilterArMetrics:
             value.insert(loc=0, column="cell_type", value=key)
         result = pd.concat(_results.values())
         return result
-
+    #这里的过滤是在矩阵的基础上进行的过滤。
     def filter_result(self):
         results = deepcopy(self.results)
         for key, value in results.items():
@@ -217,9 +217,10 @@ class FilterArMetrics:
         return df
 
     #从transform_to_pairs_in_df的结果中提取满足要求的对，并存为两列的数据框，如果out_fp为None，则返回结果，否则将结果保存为csv文件
-    def export_edge_list(self, results, out_fp=None):
+    def export_edge_list(self, results, out_dir=None):
         results = deepcopy(results)
         for key, value in results.items():
+            out_fp = os.path.join(out_dir, key + ".csv")
             results[key] = self.export_edge_list_in_df(value, out_fp)
         return results
 
